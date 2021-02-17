@@ -1,5 +1,3 @@
-import { ifError } from "assert";
-
 export class Item {
     name: string;
     sellIn: number;
