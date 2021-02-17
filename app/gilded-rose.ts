@@ -1,3 +1,5 @@
+import { ifError } from "assert";
+
 export class Item {
     name: string;
     sellIn: number;
@@ -25,45 +27,45 @@ export class GildedRose {
 
     updateQuality() {
         this.items.forEach(item => {
-            if ((<any>Object).values(SPECIAL_ITEMS).includes(item.name)) {
-                if (item.name != SPECIAL_ITEMS.BOOK && item.quality < 50) {
-                    item.quality++
+            if (item.name == SPECIAL_ITEMS.BOOK) return;
 
-                    if (item.name == SPECIAL_ITEMS.TICKETS) {
-                        if (item.quality < 50 && item.sellIn < 11) {
-                            item.quality++
-                        }
-                        if (item.quality < 50 && item.sellIn < 6) {
-                            item.quality++
-                        }
-                    } 
-                }
-            } 
-            else {
-                if (item.name != SPECIAL_ITEMS.BOOK && item.quality > 0) {
-                    item.quality--
-                }
-            }
+            item.sellIn--
 
-            if (item.name != SPECIAL_ITEMS.BOOK) {
-                item.sellIn--
-            }
+            this.updateTicketQuality(item)
+            this.updateCheeseQuality(item)
+            this.updateOthersQuality(item)
 
-            if (item.sellIn < 0) {
-                if (item.name == SPECIAL_ITEMS.CHEESE) {
-                    if (item.quality < 50) {
-                        item.quality++
-                    }
-                }
-                else if (item.name == SPECIAL_ITEMS.TICKETS) {
-                    item.quality = 0
-                }
-                else if (item.name != SPECIAL_ITEMS.BOOK && item.quality > 0) {
-                    item.quality--
-                }
-            }
+            if (item.quality < 0) item.quality = 0
+            if (item.quality > 50) item.quality = 50
         })
+        return this.items
+    }
 
-        return this.items;
+    private updateOthersQuality(item: Item) {
+        if (item.name == SPECIAL_ITEMS.CHEESE || item.name == SPECIAL_ITEMS.TICKETS) return
+        item.quality--
+        if (item.sellIn < 0) {
+            item.quality--
+        }
+    }
+
+    private updateCheeseQuality(item: Item) {
+        if (item.name != SPECIAL_ITEMS.CHEESE) return
+        item.quality++
+        if (item.sellIn < 0) {
+            item.quality++
+        }
+    }
+
+    private updateTicketQuality(item: Item) {
+        if (item.name != SPECIAL_ITEMS.TICKETS) return
+        item.quality++
+        if (item.sellIn < 0)  {
+            item.quality = 0
+        } else if (item.sellIn < 6) {
+            item.quality += 2
+        } else if (item.sellIn < 11) {
+            item.quality++
+        }
     }
 }
